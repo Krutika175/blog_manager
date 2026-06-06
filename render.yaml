@@ -1,0 +1,18 @@
+services:
+  - type: web_service
+    name: quirk-write-backend
+    env: node
+    plan: free
+    root: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/ping
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        value: "<YOUR_MONGODB_URI>"
+      - key: SESSION_SECRET
+        value: "<YOUR_SESSION_SECRET>"
+      - key: CLIENT_HOME_URL
+        value: "https://<your-frontend-site>.vercel.app"

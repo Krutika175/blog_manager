@@ -1,0 +1,43 @@
+const path = require('node:path');
+const dns = require('dns');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const blogRoutes = require('./routes/blogs');
+
+// Use a stable public DNS resolver for Atlas SRV record lookups.
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
+const app = express();
+const PORT = process.env.PORT || 4000;
+const CLIENT_HOME_URL = process.env.CLIENT_HOME_URL || 'http://localhost:5173';
+
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection failed:', err));
+
+app.use(cors({ origin: CLIENT_HOME_URL, credentials: true }));
+app.use(express.json());
+
+app.use('/api/blogs', blogRoutes);
+
+app.get('/api/ping', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+  app.get('*', (req, res) => {
+    const indexFile = path.join(__dirname, '..', 'frontend', 'dist', 'index.html');
+    res.sendFile(indexFile);
+  });
+}
+
+app.listen(PORT, () => {
+  console.log(`QuirkWrite backend listening on port ${PORT}`);
+});

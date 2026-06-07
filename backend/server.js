@@ -4,7 +4,12 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const passport = require('passport');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const blogRoutes = require('./routes/blogs');
+const authRoutes = require('./routes/auth');
+require('./config/passport');
 
 // Use a stable public DNS resolver for Atlas SRV record lookups.
 dns.setServers(['8.8.8.8', '1.1.1.1']);
@@ -67,8 +72,25 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
 
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'change_this_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      httpOnly: true,
+    },
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use('/api/auth', authRoutes);
 app.use('/api/blogs', blogRoutes);
 
 app.get('/api/ping', (req, res) => {

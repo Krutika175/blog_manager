@@ -41,7 +41,7 @@ export default function LoginPage() {
     }
 
     try {
-      const endpoint = mode === 'login' ? '/api/login' : '/api/signup';
+      const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/signup';
       await api.post(endpoint, {
         email: form.email,
         password: form.password,

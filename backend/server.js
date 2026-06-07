@@ -41,12 +41,7 @@ mongoose.connection.on('disconnected', () => {
   console.warn('Mongoose disconnected from MongoDB.');
 });
 
-const allowedOrigins = [
-  CLIENT_HOME_URL,
-  'https://blog-manager-bice.vercel.app',
-  'https://blog-manager-git-main-krutika-001-s-projects.vercel.app',
-  'https://blog-manager-s7gvlc908-krutika-001-s-projects.vercel.app',
-];
+const allowedVercelRegex = /^https:\/\/blog-manager(-.*)?\.vercel\.app$/;
 
 app.use(
   cors({
@@ -54,9 +49,18 @@ app.use(
       if (!origin) {
         return callback(null, true);
       }
-      if (allowedOrigins.includes(origin)) {
+
+      const normalizedOrigin = origin.replace(/\/+$/, '');
+      const allowedOrigins = [
+        CLIENT_HOME_URL,
+        'http://localhost:5173',
+        'https://blog-manager-bice.vercel.app',
+      ];
+
+      if (allowedOrigins.includes(normalizedOrigin) || allowedVercelRegex.test(normalizedOrigin)) {
         return callback(null, true);
       }
+
       console.warn('CORS origin rejected:', origin);
       return callback(new Error('Not allowed by CORS'));
     },

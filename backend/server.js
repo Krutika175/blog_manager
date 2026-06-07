@@ -11,7 +11,7 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const CLIENT_HOME_URL = process.env.CLIENT_HOME_URL || 'http://localhost:5173';
+const CLIENT_HOME_URL = (process.env.CLIENT_HOME_URL || 'http://localhost:5173').replace(/\/+$/, '');
 
 if (!process.env.MONGODB_URI) {
   console.error('Missing MONGODB_URI environment variable. Set it in Render or your local .env file.');
@@ -41,7 +41,28 @@ mongoose.connection.on('disconnected', () => {
   console.warn('Mongoose disconnected from MongoDB.');
 });
 
-app.use(cors({ origin: CLIENT_HOME_URL, credentials: true }));
+const allowedOrigins = [
+  CLIENT_HOME_URL,
+  'https://blog-manager-bice.vercel.app',
+  'https://blog-manager-git-main-krutika-001-s-projects.vercel.app',
+  'https://blog-manager-s7gvlc908-krutika-001-s-projects.vercel.app',
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn('CORS origin rejected:', origin);
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.use('/api/blogs', blogRoutes);

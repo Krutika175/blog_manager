@@ -13,13 +13,33 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const CLIENT_HOME_URL = process.env.CLIENT_HOME_URL || 'http://localhost:5173';
 
+if (!process.env.MONGODB_URI) {
+  console.error('Missing MONGODB_URI environment variable. Set it in Render or your local .env file.');
+  process.exit(1);
+}
+
 mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection failed:', err));
+  .catch((err) => {
+    console.error('MongoDB connection failed:', err);
+    process.exit(1);
+  });
+
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected to MongoDB.');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('Mongoose connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('Mongoose disconnected from MongoDB.');
+});
 
 app.use(cors({ origin: CLIENT_HOME_URL, credentials: true }));
 app.use(express.json());
@@ -31,12 +51,13 @@ app.get('/api/ping', (req, res) => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
-  app.get('*', (req, res) => {
-    const indexFile = path.join(__dirname, '..', 'frontend', 'dist', 'index.html');
-    res.sendFile(indexFile);
-  });
+  // This backend deployment is for APIs only. The frontend is served separately.
+  console.log('Running in production mode as backend-only service.');
 }
+
+app.get('/', (req, res) => {
+  res.send('QuirkWrite backend is running. Use the frontend URL to access the app.');
+});
 
 app.listen(PORT, () => {
   console.log(`QuirkWrite backend listening on port ${PORT}`);

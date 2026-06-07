@@ -4,6 +4,7 @@ import DashboardPage from './pages/DashboardPage.jsx';
 import BlogEditorPage from './pages/BlogEditorPage.jsx';
 import BlogViewPage from './pages/BlogViewPage.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
+import ErrorBoundary from './ErrorBoundary.jsx';
 
 function Layout() {
   return (
@@ -40,9 +41,11 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="theme-context" data-theme={themeValue.theme}>
-        <Layout />
-      </div>
+      <ErrorBoundary>
+        <div className="theme-context" data-theme={themeValue.theme}>
+          <Layout />
+        </div>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

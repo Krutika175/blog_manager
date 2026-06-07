@@ -35,11 +35,15 @@ export default function BlogViewPage() {
       {blog.imageUrl && <img className="feature-image" src={blog.imageUrl} alt={blog.title} />}
       <div className="view-meta">
         <span className="tag">{blog.tags?.[0] || 'General'}</span>
-        <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
+        <span>{new Date(blog.createdAt || Date.now()).toLocaleDateString()}</span>
       </div>
-      <h1>{blog.title}</h1>
-      <p className="blog-author">By {blog.authorName}</p>
-      <div className="blog-content">{blog.content.split('\n').map((line, index) => <p key={index}>{line}</p>)}</div>
+      <h1>{blog.title || 'Untitled post'}</h1>
+      <p className="blog-author">By {blog.authorName || 'Guest Writer'}</p>
+      <div className="blog-content">
+        {String(blog.content || '').split('\n').map((line, index) => (
+          <p key={index}>{line}</p>
+        ))}
+      </div>
     </article>
   );
 }

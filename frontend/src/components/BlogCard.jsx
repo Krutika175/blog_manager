@@ -7,10 +7,10 @@ export default function BlogCard({ blog, onDelete }) {
         <span className="tag">{blog.tags?.[0] || 'General'}</span>
         <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
       </div>
-      <h3>{blog.title}</h3>
-      <p>{blog.content.slice(0, 140)}...</p>
+      <h3>{blog.title || 'Untitled post'}</h3>
+      <p>{String(blog.content || '').slice(0, 140)}...</p>
       <div className="card-footer">
-        <span>{blog.authorName}</span>
+        <span>{blog.authorName || 'Guest Writer'}</span>
         <div className="card-actions">
           <Link to={`/blogs/${blog._id}`} className="button small">
             View
